@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const contentArea = document.getElementById("content-area");
     
-    // 静寂を表現する様々なUnicode記号群
-    const symbolDictionary = ['○', '●', '△', '▲', '□', '■', '◇', '◆', '✶', '✧', '✦', '◦', '◒', '◓', '◔', '◕', '◍', '◎', '∴', '∵', '⋮', '⋯'];
+    // 静寂を表現する様々なUnicode記号群（数学記号や幾何学記号を大幅に追加し、人間の目に奇妙に映る複雑さを生む）
+    const symbolDictionary = ['○', '●', '△', '▲', '□', '■', '◇', '◆', '✶', '✧', '✦', '◦', '◒', '◓', '◔', '◕', '◍', '◎', '∴', '∵', '⋮', '⋯', '∿', '∇', '∞', '∫', '≈', '≎', '⊕', '⊗', '∥', '⟡', '⟢', '⟣', '⧫', '⬡', '⬢', '⭘', '⨯', '⨀', '⨁', '⨂'];
     
     // 31種類の異なる記号パターン（配列）を生成する
     const patterns = [];
@@ -14,8 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     
     for(let i = 0; i < 31; i++) {
-        // 密度をさらに30%ほど上昇させる（約50個 ～ 160個 の記号）
-        let numSymbols = 52 + Math.floor(rng(i * 10 + 1) * 104);
+        // 密度をさらに約70%引き上げ、情報過多のアート空間へ（約90個 ～ 260個）
+        let numSymbols = 88 + Math.floor(rng(i * 10 + 1) * 176);
         let pattern = [];
         for(let j = 0; j < numSymbols; j++) {
             // ディクショナリーからランダムに記号を選択
@@ -50,28 +50,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 color = `rgb(${g}, ${g}, ${g})`;
             }
             
-            // 不透明度 (0.05 ～ 0.9) - 密度が上がるため、極端に薄いものや濃いものを混ぜる
+            // 不透明度 (0.05 ～ 0.9)
             const opacity = 0.05 + (Math.random() * 0.85);
             
-            // 異なるフォントサイズ (0.5rem ～ 20rem) で圧倒的な遠近感とスケールを
-            const size = 0.5 + (Math.random() * Math.random() * 20); // Math.random()を重ねることで、小さい記号が多く、巨大な記号が少数になるよう調整
+            // 異なるフォントサイズ (0.1rem ～ 30rem) - 累乗を使って「極小の無数のチリ」と「ごく少数の強烈な巨大物体」という二極化を作る
+            const size = 0.1 + (Math.pow(Math.random(), 3) * 30);
             
-            // 画面全体にさらに広くランダム配置 (大胆にはみ出させる -20% ~ 120%)
-            const top = -20 + Math.random() * 140;
-            const left = -20 + Math.random() * 140;
+            // 画面中心部に密集させつつも枠外まで広げる (-30% ~ 130%)
+            const top = -30 + Math.random() * 160;
+            const left = -30 + Math.random() * 160;
             
-            // 微妙な傾きを追加
+            // 傾きと、非対称な歪み（ストレッチ・スクワッシュ）を加えて、既存の記号の認識を崩す
             const rotate = Math.random() * 360;
+            const scaleX = 0.2 + Math.random() * 2.5; // 横に引き伸ばすなど
+            const scaleY = 0.2 + Math.random() * 2.5; // 縦に引き伸ばすなど
             
-            // さらに、ランダムで一部の記号に「ぼかし（blur）」を追加して焦点や遠近の不思議な体験を強調
-            const blurAmount = Math.random() < 0.4 ? (Math.random() * 10) : 0; // 40%の確率で0〜10pxのぼかし
+            // ランダムで一部の記号に「ぼかし」を追加して焦点の狂いを生む
+            const blurAmount = Math.random() < 0.5 ? (Math.pow(Math.random(), 3) * 15) : 0; 
 
             span.style.color = color;
             span.style.opacity = opacity;
             span.style.fontSize = `${size}rem`;
             span.style.top = `${top}%`;
             span.style.left = `${left}%`;
-            span.style.transform = `translate(-50%, -50%) rotate(${rotate}deg)`;
+            // rotate と scale を組み合わせることで、見慣れた記号が未知の抽象図形に化ける
+            span.style.transform = `translate(-50%, -50%) rotate(${rotate}deg) scale(${scaleX}, ${scaleY})`;
             if (blurAmount > 0) span.style.filter = `blur(${blurAmount}px)`;
             
             contentArea.appendChild(span);
