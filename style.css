@@ -12,21 +12,21 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer; /* 画面クリックで進むことを直感的に示す */
+    cursor: auto; /* 全体はデフォルト。中心の星雲にだけインタラクションを */
     overflow: hidden;
     user-select: none;
-    font-family: "Shippori Mincho", "Noto Serif JP", serif; /* 記号の美しさを際立たせるための明朝系 */
+    font-family: "Shippori Mincho", "Noto Serif JP", serif;
 }
 
-/* stilled-wordsからのレイアウト継承 */
 #aphorism-container {
     width: 85%;
     max-width: 900px;
-    height: 70vh; /* ナビゲーションと被らないように少し控えめな高さに */
+    height: 70vh;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
+    cursor: pointer; /* 枠内をクリックで次へ */
 }
 
 #content-area {
@@ -35,8 +35,12 @@ body {
     height: 100%;
     opacity: 0;
     transition: opacity 2s ease-in-out;
-    /* 枠線や背景色を消し、記号が見えない境界でスパッと切り取られる不思議な表現に */
-    overflow: hidden; 
+    background-color: #fafafa;
+    overflow: hidden; /* 枠外にはみ出た記号をカットし、フレーム感を持続 */
+    
+    /* マウスの重力効果のためのカスタムプロパティ初期値 */
+    --mx: 0;
+    --my: 0;
 }
 
 #content-area.visible {
@@ -46,7 +50,33 @@ body {
 /* 個々の記号のクラス */
 .symbol {
     position: absolute;
-    mix-blend-mode: multiply; /* 記号同士が重なった時に色が融合し、複雑な図形を生み出す */
+    mix-blend-mode: multiply; /* 記号同士が重なった時に色が融合し、有機的な深みを生み出す */
+    
+    /* ホバー時の「重力」による吸い寄せのトランジション */
+    /* カスタムプロパティ--mx, --myに対するスムーズな追従 */
+    transition: translate 1.5s cubic-bezier(0.1, 0.8, 0.2, 1);
+    
+    /* 独立した重力移動（ JSから渡された引力係数 --pull に基づくパララックス ） */
+    translate: calc(var(--mx) * var(--pull, 0) * 1px) calc(var(--my) * var(--pull, 0) * 1px);
+    
+    /* 微細な揺らぎ（無心効果）のアニメーション */
+    animation: hypnotic-drift var(--drift-dur, 10s) ease-in-out infinite alternate;
+}
+
+/* 記号が生きているようにゆっくりと呼吸・微動するキーフレーム */
+@keyframes hypnotic-drift {
+    0% {
+        opacity: var(--base-op);
+        margin-left: calc(var(--drift-x, -3) * 1px);
+        margin-top: calc(var(--drift-y, -3) * 1px);
+        /* scaleは別途持たせているためmarginで微動させる */
+    }
+    100% {
+        /* やや透過率を変えて明滅をシミュレート */
+        opacity: calc(var(--base-op) * 1.5);
+        margin-left: calc(var(--drift-x, 3) * -1px);
+        margin-top: calc(var(--drift-y, 3) * -1px);
+    }
 }
 
 /* レスポンシブ対応の継承 */
@@ -62,8 +92,8 @@ body {
     position: fixed;
     font-weight: 100;
     font-size: 1rem;
-    color: #000000; /* ご指定の黒色 */
-    opacity: 0.5; /* 常時見えるように少し不透明度を持たせる */
+    color: #000000;
+    opacity: 0.5;
     transition: opacity 0.4s ease-in-out;
     cursor: pointer;
     z-index: 900;
@@ -75,27 +105,6 @@ body {
     opacity: 1 !important;
 }
 
-.nav-left {
-    top: 50%;
-    left: 6.18vw;
-    transform: translateY(-50%);
-    font-size: 1.5rem;
-    padding: 1rem;
-}
-
-.nav-right {
-    top: 50%;
-    right: 6.18vw;
-    transform: translateY(-50%);
-    font-size: 1.5rem;
-    padding: 1rem;
-}
-
-.share-wrapper {
-    bottom: 6.18vh;
-    right: 6.18vw;
-    font-size: 0.7rem;
-    letter-spacing: 0.4em;
-    padding: 1rem;
-    text-align: right;
-}
+.nav-left { top: 50%; left: 6.18vw; transform: translateY(-50%); font-size: 1.5rem; padding: 1rem; }
+.nav-right { top: 50%; right: 6.18vw; transform: translateY(-50%); font-size: 1.5rem; padding: 1rem; }
+.share-wrapper { bottom: 6.18vh; right: 6.18vw; font-size: 0.7rem; letter-spacing: 0.4em; padding: 1rem; text-align: right; }

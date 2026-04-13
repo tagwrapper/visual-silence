@@ -1,87 +1,110 @@
 document.addEventListener("DOMContentLoaded", () => {
     const contentArea = document.getElementById("content-area");
+    const container = document.getElementById("aphorism-container");
     
-    // 静寂を表現する様々なUnicode記号群（数学記号や幾何学記号を大幅に追加し、人間の目に奇妙に映る複雑さを生む）
-    const symbolDictionary = ['○', '●', '△', '▲', '□', '■', '◇', '◆', '✶', '✧', '✦', '◦', '◒', '◓', '◔', '◕', '◍', '◎', '∴', '∵', '⋮', '⋯', '∿', '∇', '∞', '∫', '≈', '≎', '⊕', '⊗', '∥', '⟡', '⟢', '⟣', '⧫', '⬡', '⬢', '⭘', '⨯', '⨀', '⨁', '⨂'];
+    // 単純さの極限：微細で抽象的な記号のプール
+    // 基本記号、点線、円弧、ブロック、ブライユ点字、奇妙な多眼パターンなど
+    const braille = Array.from({length: 64}, (_, i) => String.fromCharCode(0x2800 + Math.floor(Math.random() * 255)));
+    const blockElements = ['░', '▒', '▓', '█', '▄', '▀', '▌', '▐', '▞', '▚'];
+    const simpleAbstract = ['·', '◌', '◜', '◞', '◟', '◝', '⧖', 'ꙮ', '⌭', '⍝', '⏣', '⎔', '⑆', '⑈', '⑌', '○', '●', '◦', '∴', '∵'];
+    const symbolDictionary = [...braille, ...blockElements, ...simpleAbstract];
     
-    // 31種類の異なる記号パターン（配列）を生成する
-    const patterns = [];
-    
-    // 乱数ジェネレーター（インデックスごとに固定の結果を生成し、31種類の固定配列を作るため）
-    const rng = (seed) => {
-        let x = Math.sin(seed) * 10000;
-        return x - Math.floor(x);
-    };
+    // 31種類の「重力の位相（Phase）」を生成する
+    const phases = [];
+    const rng = (seed) => { let x = Math.sin(seed) * 10000; return x - Math.floor(x); };
     
     for(let i = 0; i < 31; i++) {
-        // 密度をさらに約70%引き上げ、情報過多のアート空間へ（約90個 ～ 260個）
-        let numSymbols = 88 + Math.floor(rng(i * 10 + 1) * 176);
+        // 重力の位相を定義
+        const density = 200 + Math.floor(rng(i * 10 + 1) * 400); // 200〜600個の記号
+        const speedBase = 5 + rng(i * 10 + 2) * 15; // 揺らぎの速度ベース (5s 〜 20s)
+        
+        // 色の微細な偏り（フェーズごとに赤み、青み、黄みなどが僅かに混じる）
+        const rTint = Math.floor(rng(i * 10 + 3) * 40) - 20;
+        const gTint = Math.floor(rng(i * 10 + 4) * 40) - 20;
+        const bTint = Math.floor(rng(i * 10 + 5) * 40) - 20;
+
         let pattern = [];
-        for(let j = 0; j < numSymbols; j++) {
-            // ディクショナリーからランダムに記号を選択
+        for(let j = 0; j < density; j++) {
             const symbolIndex = Math.floor(rng(i * 100 + j + 5) * symbolDictionary.length);
             pattern.push(symbolDictionary[symbolIndex]);
         }
-        patterns.push(pattern);
+        phases.push({
+            symbols: pattern,
+            speedBase: speedBase,
+            colorTint: { r: rTint, g: gTint, b: bTint }
+        });
     }
 
     let currentIndex = 0;
-    let isTransitioning = false; // 連続クリックによる進行防止
+    let isTransitioning = false;
     
-    // パターンを描画する関数
-    const renderPattern = (pattern) => {
-        contentArea.innerHTML = ''; // クリア
+    // 星雲（フェーズ）を描画する関数
+    const renderPhase = (phase, seedIndex) => {
+        contentArea.innerHTML = ''; 
         
-        pattern.forEach((sym) => {
+        phase.symbols.forEach((sym, idx) => {
             const span = document.createElement("span");
             span.textContent = sym;
             span.className = "symbol";
             
-            // 北欧デザインを意識した洗練された「黒」と「グレー」の2色（濃淡）
-            const isBlack = Math.random() < 0.25; // 25%の確率で引き締まった黒
-            const baseGrays = [150, 180, 210]; // グレーのバリエーション
+            // 色の計算（ベースのグレーに、フェーズ固有の微細なTintを加える）
+            // 北欧系の濃いめのグレーから明るいグレーまで
+            let baseGray = 50 + Math.floor(Math.random() * 150);
             
-            let color;
-            if (isBlack) {
-                color = '#222222'; // 暖かみと深みのあるオフブラック
-            } else {
-                // グレーを選択
-                const g = baseGrays[Math.floor(Math.random() * baseGrays.length)];
-                color = `rgb(${g}, ${g}, ${g})`;
-            }
+            // 20%の確率で極限まで黒に近い「重力の芯」を作る
+            if(Math.random() < 0.2) baseGray = 20 + Math.floor(Math.random() * 20);
             
-            // 不透明度 (0.05 ～ 0.9)
-            const opacity = 0.05 + (Math.random() * 0.85);
+            const r = Math.max(0, Math.min(255, baseGray + phase.colorTint.r));
+            const g = Math.max(0, Math.min(255, baseGray + phase.colorTint.g));
+            const b = Math.max(0, Math.min(255, baseGray + phase.colorTint.b));
+            span.style.color = `rgb(${r}, ${g}, ${b})`;
             
-            // 異なるフォントサイズ (0.1rem ～ 30rem) - 累乗を使って「極小の無数のチリ」と「ごく少数の強烈な巨大物体」という二極化を作る
-            const size = 0.1 + (Math.pow(Math.random(), 3) * 30);
+            // 不透明度 (10% ～ 90%) 密度のレイヤリング
+            const baseOp = 0.1 + (Math.random() * 0.8);
             
-            // 画面中心部に密集させつつも枠外まで広げる (-30% ~ 130%)
-            const top = -30 + Math.random() * 160;
-            const left = -30 + Math.random() * 160;
+            // フォントサイズ: 極小 (2px) から 中 (24px) までの極端な幅
+            const sizePx = 2 + Math.floor(Math.pow(Math.random(), 2) * 22);
             
-            // 傾きと、非対称な歪み（ストレッチ・スクワッシュ）を加えて、既存の記号の認識を崩す
+            // 画面中央を中心としたガウス分布的な偏りを持たせる（ブラックホール的密集）
+            // Math.random() + Math.random() + Math.random() / 3 は 0.5 付近にピークを持つ
+            const uTop = (Math.random() + Math.random() + Math.random()) / 3;
+            const uLeft = (Math.random() + Math.random() + Math.random()) / 3;
+            const top = -10 + (uTop * 120); // -10% ~ 110%
+            const left = -10 + (uLeft * 120);
+            
             const rotate = Math.random() * 360;
-            const scaleX = 0.2 + Math.random() * 2.5; // 横に引き伸ばすなど
-            const scaleY = 0.2 + Math.random() * 2.5; // 縦に引き伸ばすなど
             
-            // ランダムで一部の記号に「ぼかし」を追加して焦点の狂いを生む
-            const blurAmount = Math.random() < 0.5 ? (Math.pow(Math.random(), 3) * 15) : 0; 
+            // z-indexをランダムに割り当て視覚的な奥行きを強める
+            const zIndex = Math.floor(Math.random() * 100);
+            
+            // マウス重力に引かれる係数（大きいほど強く引かれるか、逆位相になるか）
+            // 重なり順(z-index)が手前のものほど強く引かれる（パララックス効果）
+            const pullFactor = (zIndex - 50) * 1.5; 
+            
+            // 独立した微動アニメーションのパラメータ
+            const driftDuration = phase.speedBase * (0.5 + Math.random());
+            const driftX = (Math.random() - 0.5) * 10;
+            const driftY = (Math.random() - 0.5) * 10;
+            const delay = Math.random() * -20; // すぐにバラバラの位相で始まるようにマイナス遅延
 
-            span.style.color = color;
-            span.style.opacity = opacity;
-            span.style.fontSize = `${size}rem`;
+            span.style.setProperty('--base-op', baseOp);
+            span.style.setProperty('--pull', pullFactor);
+            span.style.setProperty('--drift-dur', `${driftDuration}s`);
+            span.style.setProperty('--drift-x', driftX);
+            span.style.setProperty('--drift-y', driftY);
+            
+            span.style.fontSize = `${sizePx}px`;
             span.style.top = `${top}%`;
             span.style.left = `${left}%`;
-            // rotate と scale を組み合わせることで、見慣れた記号が未知の抽象図形に化ける
-            span.style.transform = `translate(-50%, -50%) rotate(${rotate}deg) scale(${scaleX}, ${scaleY})`;
-            if (blurAmount > 0) span.style.filter = `blur(${blurAmount}px)`;
+            span.style.zIndex = zIndex;
+            span.style.animationDelay = `${delay}s`;
+            
+            span.style.transform = `translate(-50%, -50%) rotate(${rotate}deg)`;
             
             contentArea.appendChild(span);
         });
     };
 
-    // 次の抽象絵（記号パターン）へ遷移する関数
     const transitionToNextPattern = () => {
         if (isTransitioning) return;
         isTransitioning = true;
@@ -89,19 +112,15 @@ document.addEventListener("DOMContentLoaded", () => {
         contentArea.classList.remove("visible");
         
         setTimeout(() => {
-            currentIndex = (currentIndex + 1) % patterns.length;
-            renderPattern(patterns[currentIndex]);
+            currentIndex = (currentIndex + 1) % phases.length;
+            renderPhase(phases[currentIndex], currentIndex);
             
             void contentArea.offsetWidth;
-            
             contentArea.classList.add("visible");
-            setTimeout(() => {
-                isTransitioning = false;
-            }, 2000);
+            setTimeout(() => { isTransitioning = false; }, 2000);
         }, 2000);
     };
 
-    // 前の抽象絵（記号パターン）へ遷移する関数
     const transitionToPrevPattern = () => {
         if (isTransitioning) return;
         isTransitioning = true;
@@ -109,25 +128,20 @@ document.addEventListener("DOMContentLoaded", () => {
         contentArea.classList.remove("visible");
         
         setTimeout(() => {
-            currentIndex = (currentIndex - 1 + patterns.length) % patterns.length;
-            renderPattern(patterns[currentIndex]);
+            currentIndex = (currentIndex - 1 + phases.length) % phases.length;
+            renderPhase(phases[currentIndex], currentIndex);
             
             void contentArea.offsetWidth;
-            
             contentArea.classList.add("visible");
-            setTimeout(() => {
-                isTransitioning = false;
-            }, 2000);
+            setTimeout(() => { isTransitioning = false; }, 2000);
         }, 2000);
     };
 
-    // 初期表示
-    renderPattern(patterns[currentIndex]);
-    setTimeout(() => {
-        contentArea.classList.add("visible");
-    }, 100);
+    // 初回描画
+    renderPhase(phases[currentIndex], currentIndex);
+    setTimeout(() => { contentArea.classList.add("visible"); }, 100);
 
-    // イベントリスナーの登録（bodyクリックから固有のボタンへ変更）
+    // イベントリスナー
     const prevBtn = document.getElementById("nav-btn-prev");
     const nextBtn = document.getElementById("nav-btn-next");
     const shareBtn = document.getElementById("share-toggle");
@@ -135,9 +149,29 @@ document.addEventListener("DOMContentLoaded", () => {
     if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); transitionToPrevPattern(); });
     if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); transitionToNextPattern(); });
     
-    // シェアボタンの挙動は、将来的な拡張性を考えて仮実装
     if (shareBtn) shareBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         alert("シェア機能が呼び出されました。");
+    });
+    
+    // 枠内（記号の星雲）をクリックした場合も次に進む（吸い込まれる誘発）
+    container.addEventListener("click", transitionToNextPattern);
+    
+    // 【ホバー時の「重力」演出】
+    // 枠内でのマウス座標を取得し、カスタムプロパティを更新する
+    container.addEventListener("mousemove", (e) => {
+        const rect = container.getBoundingClientRect();
+        // 中心を0とし、端を -1 〜 1 とする座標系 (-0.5~0.5 を作って 2倍)
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+        const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+        
+        contentArea.style.setProperty('--mx', x);
+        contentArea.style.setProperty('--my', y);
+    });
+    
+    // マウスが外れたら重力場をリセットしてゆっくり元に戻す
+    container.addEventListener("mouseleave", () => {
+        contentArea.style.setProperty('--mx', 0);
+        contentArea.style.setProperty('--my', 0);
     });
 });
