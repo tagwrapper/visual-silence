@@ -14,8 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     
     for(let i = 0; i < 31; i++) {
-        // パターンごとに 4個 ～ 9個 の記号を持たせる
-        let numSymbols = 4 + Math.floor(rng(i * 10 + 1) * 6);
+        // 密度を圧倒的に高め、不思議な視覚体験を生み出す（40個 ～ 120個 の記号）
+        let numSymbols = 40 + Math.floor(rng(i * 10 + 1) * 80);
         let pattern = [];
         for(let j = 0; j < numSymbols; j++) {
             // ディクショナリーからランダムに記号を選択
@@ -43,25 +43,29 @@ document.addEventListener("DOMContentLoaded", () => {
             const lit = 40 + Math.random() * 40; // 40% ~ 80%
             const color = `hsl(${hue}, ${sat}%, ${lit}%)`;
             
-            // 不透明度 (0.2 ～ 0.8)
-            const opacity = 0.15 + (Math.random() * 0.55);
+            // 不透明度 (0.05 ～ 0.9) - 密度が上がるため、極端に薄いものや濃いものを混ぜる
+            const opacity = 0.05 + (Math.random() * 0.85);
             
-            // 異なるフォントサイズ (2rem ～ 8rem)
-            const size = 2 + (Math.random() * 6);
+            // 異なるフォントサイズ (0.5rem ～ 20rem) で圧倒的な遠近感とスケールを
+            const size = 0.5 + (Math.random() * Math.random() * 20); // Math.random()を重ねることで、小さい記号が多く、巨大な記号が少数になるよう調整
             
-            // 画面の中央付近にランダム配置 (中心を基準にある程度散らばらせる)
-            const top = 20 + Math.random() * 60; // 20% ~ 80%
-            const left = 20 + Math.random() * 60; // 20% ~ 80%
+            // 画面全体にさらに広くランダム配置 (大胆にはみ出させる -20% ~ 120%)
+            const top = -20 + Math.random() * 140;
+            const left = -20 + Math.random() * 140;
             
             // 微妙な傾きを追加
             const rotate = Math.random() * 360;
             
+            // さらに、ランダムで一部の記号に「ぼかし（blur）」を追加して焦点や遠近の不思議な体験を強調
+            const blurAmount = Math.random() < 0.4 ? (Math.random() * 10) : 0; // 40%の確率で0〜10pxのぼかし
+
             span.style.color = color;
             span.style.opacity = opacity;
             span.style.fontSize = `${size}rem`;
             span.style.top = `${top}%`;
             span.style.left = `${left}%`;
             span.style.transform = `translate(-50%, -50%) rotate(${rotate}deg)`;
+            if (blurAmount > 0) span.style.filter = `blur(${blurAmount}px)`;
             
             contentArea.appendChild(span);
         });
