@@ -37,11 +37,13 @@ document.addEventListener("DOMContentLoaded", () => {
             span.textContent = sym;
             span.className = "symbol";
             
-            // モノトーンの極めて淡い色: #cccccc (204) ～ #eeeeee (238)
-            const c = 204 + Math.floor(Math.random() * 35);
-            const color = `rgb(${c}, ${c}, ${c})`;
+            // ご指定の通り様々な色使い（HSLを使って彩度や明度を調整し、鮮やかさと馴染みやすさを両立）
+            const hue = Math.floor(Math.random() * 360);
+            const sat = 40 + Math.random() * 60; // 40% ~ 100%
+            const lit = 40 + Math.random() * 40; // 40% ~ 80%
+            const color = `hsl(${hue}, ${sat}%, ${lit}%)`;
             
-            // 異なる不透明度 (0.15 ～ 0.7) で静けさと距離感を表現
+            // 不透明度 (0.2 ～ 0.8)
             const opacity = 0.15 + (Math.random() * 0.55);
             
             // 異なるフォントサイズ (2rem ～ 8rem)
@@ -70,21 +72,38 @@ document.addEventListener("DOMContentLoaded", () => {
         if (isTransitioning) return;
         isTransitioning = true;
         
-        // 1. まず現在の記号群をゆっくりフェードアウト (2秒)
         contentArea.classList.remove("visible");
         
-        // 2. 完全に消えた後（2秒後）に記号を再配置してフェードイン
         setTimeout(() => {
             currentIndex = (currentIndex + 1) % patterns.length;
             renderPattern(patterns[currentIndex]);
             
-            // 強制リフローさせてからクラスを追加（即時適用によるフェード省略を防ぐ）
             void contentArea.offsetWidth;
             
             contentArea.classList.add("visible");
             setTimeout(() => {
                 isTransitioning = false;
-            }, 2000); // フェードイン完了までの待機
+            }, 2000);
+        }, 2000);
+    };
+
+    // 前の抽象絵（記号パターン）へ遷移する関数
+    const transitionToPrevPattern = () => {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        
+        contentArea.classList.remove("visible");
+        
+        setTimeout(() => {
+            currentIndex = (currentIndex - 1 + patterns.length) % patterns.length;
+            renderPattern(patterns[currentIndex]);
+            
+            void contentArea.offsetWidth;
+            
+            contentArea.classList.add("visible");
+            setTimeout(() => {
+                isTransitioning = false;
+            }, 2000);
         }, 2000);
     };
 
@@ -94,6 +113,17 @@ document.addEventListener("DOMContentLoaded", () => {
         contentArea.classList.add("visible");
     }, 100);
 
-    // 画面のどこをクリックしても次へ遷移
-    document.body.addEventListener("click", transitionToNextPattern);
+    // イベントリスナーの登録（bodyクリックから固有のボタンへ変更）
+    const prevBtn = document.getElementById("nav-btn-prev");
+    const nextBtn = document.getElementById("nav-btn-next");
+    const shareBtn = document.getElementById("share-toggle");
+
+    if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); transitionToPrevPattern(); });
+    if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); transitionToNextPattern(); });
+    
+    // シェアボタンの挙動は、将来的な拡張性を考えて仮実装
+    if (shareBtn) shareBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        alert("シェア機能が呼び出されました。");
+    });
 });

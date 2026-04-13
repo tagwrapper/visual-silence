@@ -55,3 +55,46 @@ body {
         height: 90vh;
     }
 }
+
+/* UI Elements */
+.ui-element {
+    position: fixed;
+    font-weight: 100;
+    font-size: 1rem;
+    color: #000000; /* ご指定の黒色 */
+    opacity: 0.5; /* 常時見えるように少し不透明度を持たせる */
+    transition: opacity 0.4s ease-in-out;
+    cursor: pointer;
+    z-index: 900;
+    user-select: none;
+    letter-spacing: 0.3em;
+}
+
+.ui-element:hover {
+    opacity: 1 !important;
+}
+
+.nav-left {
+    top: 50%;
+    left: 6.18vw;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    padding: 1rem;
+}
+
+.nav-right {
+    top: 50%;
+    right: 6.18vw;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    padding: 1rem;
+}
+
+.share-wrapper {
+    bottom: 6.18vh;
+    right: 6.18vw;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    padding: 1rem;
+    text-align: right;
+}
