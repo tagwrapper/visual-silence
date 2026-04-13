@@ -1,13 +1,99 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 完全に静寂にフォーカスするため、UIロジックなどは極限まで削減。
-    // まず画像をゆっくりとフェードインさせる演出を加えます。
-    const img = document.getElementById("gallery-image");
+    const contentArea = document.getElementById("content-area");
     
-    // 初期状態を透明に
-    img.style.opacity = "0";
+    // 静寂を表現する様々なUnicode記号群
+    const symbolDictionary = ['○', '●', '△', '▲', '□', '■', '◇', '◆', '✶', '✧', '✦', '◦', '◒', '◓', '◔', '◕', '◍', '◎', '∴', '∵', '⋮', '⋯'];
     
-    // 少し遅延を入れてからゆっくりと表示させることで「静寂」を強調
+    // 31種類の異なる記号パターン（配列）を生成する
+    const patterns = [];
+    
+    // 乱数ジェネレーター（インデックスごとに固定の結果を生成し、31種類の固定配列を作るため）
+    const rng = (seed) => {
+        let x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    };
+    
+    for(let i = 0; i < 31; i++) {
+        // パターンごとに 4個 ～ 9個 の記号を持たせる
+        let numSymbols = 4 + Math.floor(rng(i * 10 + 1) * 6);
+        let pattern = [];
+        for(let j = 0; j < numSymbols; j++) {
+            // ディクショナリーからランダムに記号を選択
+            const symbolIndex = Math.floor(rng(i * 100 + j + 5) * symbolDictionary.length);
+            pattern.push(symbolDictionary[symbolIndex]);
+        }
+        patterns.push(pattern);
+    }
+
+    let currentIndex = 0;
+    let isTransitioning = false; // 連続クリックによる進行防止
+    
+    // パターンを描画する関数
+    const renderPattern = (pattern) => {
+        contentArea.innerHTML = ''; // クリア
+        
+        pattern.forEach((sym) => {
+            const span = document.createElement("span");
+            span.textContent = sym;
+            span.className = "symbol";
+            
+            // モノトーンの極めて淡い色: #cccccc (204) ～ #eeeeee (238)
+            const c = 204 + Math.floor(Math.random() * 35);
+            const color = `rgb(${c}, ${c}, ${c})`;
+            
+            // 異なる不透明度 (0.15 ～ 0.7) で静けさと距離感を表現
+            const opacity = 0.15 + (Math.random() * 0.55);
+            
+            // 異なるフォントサイズ (2rem ～ 8rem)
+            const size = 2 + (Math.random() * 6);
+            
+            // 画面の中央付近にランダム配置 (中心を基準にある程度散らばらせる)
+            const top = 20 + Math.random() * 60; // 20% ~ 80%
+            const left = 20 + Math.random() * 60; // 20% ~ 80%
+            
+            // 微妙な傾きを追加
+            const rotate = Math.random() * 360;
+            
+            span.style.color = color;
+            span.style.opacity = opacity;
+            span.style.fontSize = `${size}rem`;
+            span.style.top = `${top}%`;
+            span.style.left = `${left}%`;
+            span.style.transform = `translate(-50%, -50%) rotate(${rotate}deg)`;
+            
+            contentArea.appendChild(span);
+        });
+    };
+
+    // 次の抽象絵（記号パターン）へ遷移する関数
+    const transitionToNextPattern = () => {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        
+        // 1. まず現在の記号群をゆっくりフェードアウト (2秒)
+        contentArea.classList.remove("visible");
+        
+        // 2. 完全に消えた後（2秒後）に記号を再配置してフェードイン
+        setTimeout(() => {
+            currentIndex = (currentIndex + 1) % patterns.length;
+            renderPattern(patterns[currentIndex]);
+            
+            // 強制リフローさせてからクラスを追加（即時適用によるフェード省略を防ぐ）
+            void contentArea.offsetWidth;
+            
+            contentArea.classList.add("visible");
+            setTimeout(() => {
+                isTransitioning = false;
+            }, 2000); // フェードイン完了までの待機
+        }, 2000);
+    };
+
+    // 初期表示
+    renderPattern(patterns[currentIndex]);
     setTimeout(() => {
-        img.style.opacity = "1";
-    }, 500);
+        contentArea.classList.add("visible");
+    }, 100);
+
+    // 画面のどこをクリックしても次へ遷移
+    document.body.addEventListener("click", transitionToNextPattern);
 });
