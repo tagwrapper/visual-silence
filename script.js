@@ -14,8 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     
     for(let i = 0; i < 31; i++) {
-        // 密度を圧倒的に高め、不思議な視覚体験を生み出す（40個 ～ 120個 の記号）
-        let numSymbols = 40 + Math.floor(rng(i * 10 + 1) * 80);
+        // 密度をさらに30%ほど上昇させる（約50個 ～ 160個 の記号）
+        let numSymbols = 52 + Math.floor(rng(i * 10 + 1) * 104);
         let pattern = [];
         for(let j = 0; j < numSymbols; j++) {
             // ディクショナリーからランダムに記号を選択

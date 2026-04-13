@@ -35,11 +35,8 @@ body {
     height: 100%;
     opacity: 0;
     transition: opacity 2s ease-in-out;
-    /* 北欧デザイン的なミニマルで洗練された「枠（フレーム）」の表現 */
-    background-color: #fafafa;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-    overflow: hidden; /* 枠外にはみ出た記号をカットし、フレームを強調する */
+    /* 枠線や背景色を消し、記号が見えない境界でスパッと切り取られる不思議な表現に */
+    overflow: hidden; 
 }
 
 #content-area.visible {
