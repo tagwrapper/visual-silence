@@ -37,11 +37,18 @@ document.addEventListener("DOMContentLoaded", () => {
             span.textContent = sym;
             span.className = "symbol";
             
-            // ご指定の通り様々な色使い（HSLを使って彩度や明度を調整し、鮮やかさと馴染みやすさを両立）
-            const hue = Math.floor(Math.random() * 360);
-            const sat = 40 + Math.random() * 60; // 40% ~ 100%
-            const lit = 40 + Math.random() * 40; // 40% ~ 80%
-            const color = `hsl(${hue}, ${sat}%, ${lit}%)`;
+            // 北欧デザインを意識した洗練された「黒」と「グレー」の2色（濃淡）
+            const isBlack = Math.random() < 0.25; // 25%の確率で引き締まった黒
+            const baseGrays = [150, 180, 210]; // グレーのバリエーション
+            
+            let color;
+            if (isBlack) {
+                color = '#222222'; // 暖かみと深みのあるオフブラック
+            } else {
+                // グレーを選択
+                const g = baseGrays[Math.floor(Math.random() * baseGrays.length)];
+                color = `rgb(${g}, ${g}, ${g})`;
+            }
             
             // 不透明度 (0.05 ～ 0.9) - 密度が上がるため、極端に薄いものや濃いものを混ぜる
             const opacity = 0.05 + (Math.random() * 0.85);
